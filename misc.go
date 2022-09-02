@@ -24,9 +24,10 @@ import (
 	"time"
 
 	"github.com/Nerzal/gocloak/v11"
-	"github.com/gogatekeeper/gatekeeper/pkg/constant"
 	"go.uber.org/zap"
 	"gopkg.in/square/go-jose.v2/jwt"
+
+	"github.com/gogatekeeper/gatekeeper/pkg/constant"
 )
 
 // filterCookies is responsible for censoring any cookies we don't want sent
@@ -250,11 +251,22 @@ func (r *oauthProxy) redirectToAuthorization(wrt http.ResponseWriter, req *http.
 		return r.revokeProxy(wrt, req)
 	}
 
+	redirectURL := r.config.WithOAuthURI(constant.AuthorizationURL)
+	redirectStatusCode := http.StatusSeeOther
+
+	if r.config.UnauthorizedRedirectURL != "" {
+		redirectURL = r.config.UnauthorizedRedirectURL
+
+		if r.config.UnauthorizedRedirectHTTPStatusCode != 0 {
+			redirectStatusCode = r.config.UnauthorizedRedirectHTTPStatusCode
+		}
+	}
+
 	r.redirectToURL(
-		r.config.WithOAuthURI(constant.AuthorizationURL+authQuery),
+		redirectURL+authQuery,
 		wrt,
 		req,
-		http.StatusSeeOther,
+		redirectStatusCode,
 	)
 
 	return r.revokeProxy(wrt, req)

@@ -22,9 +22,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gogatekeeper/gatekeeper/pkg/authorization"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
+
+	"github.com/gogatekeeper/gatekeeper/pkg/authorization"
 )
 
 var (
@@ -250,6 +251,11 @@ type Config struct {
 	StoreURL string `json:"store-url" yaml:"store-url" usage:"url for the storage subsystem, e.g redis://127.0.0.1:6379, file:///etc/tokens.file" env:"STORE_URL"`
 	// EncryptionKey is the encryption key used to encrypt the refresh token
 	EncryptionKey string `json:"encryption-key" yaml:"encryption-key" usage:"encryption key used to encryption the session state" env:"ENCRYPTION_KEY"`
+
+	// UnauthorizedRedirectURL is an url to which the redirect will be made instead of the standard redirect with a 401 http status code
+	UnauthorizedRedirectURL string `yaml:"unauthorized-redirect-url" json:"unauthorized-redirect-url" usage:"set an url to overwrite the standard url for redirect on 401 error, e.g /unauthorized, https://domen.com/unauthorized (when redirecting to yourself - do not forget to set resources)" env:"UNAUTHORIZED_REDIRECT_URL"`
+	// UnauthorizedRedirectHTTPStatusCode is an error status code that will be sent when redirecting to UnauthorizedRedirectURL
+	UnauthorizedRedirectHTTPStatusCode int `yaml:"unauthorized-redirect-http-status-code" json:"unauthorized-redirect-http-status-code" usage:"set port instead of default port (303) when redirecting with 401 error" env:"UNAUTHORIZED_REDIRECT_HTTP_STATUS_CODE"`
 
 	// NoRedirects informs we should hand back a 401 not a redirect
 	NoRedirects bool `json:"no-redirects" yaml:"no-redirects" usage:"do not have back redirects when no authentication is present, 401 them" env:"NO_REDIRECTS"`
