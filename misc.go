@@ -82,9 +82,10 @@ func (r *oauthProxy) revokeProxy(w http.ResponseWriter, req *http.Request) conte
 
 // accessForbidden redirects the user to the forbidden page
 func (r *oauthProxy) accessForbidden(wrt http.ResponseWriter, req *http.Request) context.Context {
-	wrt.WriteHeader(http.StatusForbidden)
 	// are we using a custom http template for 403?
 	if r.config.hasCustomForbiddenPage() {
+		wrt.WriteHeader(http.StatusForbidden)
+
 		name := path.Base(r.config.ForbiddenPage)
 
 		if err := r.Render(wrt, name, r.config.Tags); err != nil {
@@ -95,6 +96,25 @@ func (r *oauthProxy) accessForbidden(wrt http.ResponseWriter, req *http.Request)
 			)
 		}
 	}
+
+	if r.config.UpstreamForbiddenPath != "" {
+		scope, assertOk := req.Context().Value(constant.ContextScopeName).(*RequestScope)
+		if !assertOk {
+			scope = &RequestScope{}
+		}
+
+		scope.AccessDenied = false
+		scope.Method = r.config.UpstreamForbiddenMethod
+
+		scope.Path = r.config.UpstreamForbiddenPath
+		if !strings.HasPrefix(scope.Path, "/") {
+			scope.Path = "/" + scope.Path
+		}
+
+		return context.WithValue(req.Context(), constant.ContextScopeName, scope)
+	}
+
+	wrt.WriteHeader(http.StatusForbidden)
 
 	return r.revokeProxy(wrt, req)
 }
@@ -251,7 +271,7 @@ func (r *oauthProxy) redirectToAuthorization(wrt http.ResponseWriter, req *http.
 		return r.revokeProxy(wrt, req)
 	}
 
-	if r.config.UnauthorizedProxyRedirectPath != "" {
+	if r.config.UpstreamUnauthorizedPath != "" {
 		scope, assertOk := req.Context().Value(constant.ContextScopeName).(*RequestScope)
 		if !assertOk {
 			scope = &RequestScope{}
@@ -259,10 +279,9 @@ func (r *oauthProxy) redirectToAuthorization(wrt http.ResponseWriter, req *http.
 
 		scope.AccessDenied = false
 		scope.ForceProxy = true
-		scope.Path = r.config.UnauthorizedProxyRedirectPath
-		scope.RawPath = r.config.UnauthorizedProxyRedirectPath
-		scope.Method = r.config.UnauthorizedProxyRedirectMethod
+		scope.Method = r.config.UpstreamUnauthorizedMethod
 
+		scope.Path = r.config.UpstreamUnauthorizedPath
 		if !strings.HasPrefix(scope.Path, "/") {
 			scope.Path = "/" + scope.Path
 		}

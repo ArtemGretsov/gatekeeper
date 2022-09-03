@@ -252,10 +252,10 @@ type Config struct {
 	// EncryptionKey is the encryption key used to encrypt the refresh token
 	EncryptionKey string `json:"encryption-key" yaml:"encryption-key" usage:"encryption key used to encryption the session state" env:"ENCRYPTION_KEY"`
 
-	// UnauthorizedProxyRedirectPath is an url to which the redirect will be made instead of the standard redirect with a 401 http status code
-	UnauthorizedProxyRedirectPath string `yaml:"unauthorized-proxy-redirect-path" json:"unauthorized-proxy-redirect-path" usage:"set an url to overwrite the standard url for redirect on 401 error, e.g /unauthorized, https://domen.com/unauthorized (when redirecting to yourself - do not forget to set resources)" env:"UNAUTHORIZED_REDIRECT_URL"`
-	// UnauthorizedProxyRedirectMethod is an error status code that will be sent when redirecting to UnauthorizedProxyRedirectPath
-	UnauthorizedProxyRedirectMethod string `yaml:"unauthorized-proxy-redirect-method" json:"unauthorized-proxy-redirect-method" usage:"set port instead of default port (303) when redirecting with 401 error" env:"UNAUTHORIZED_REDIRECT_HTTP_STATUS_CODE"`
+	UpstreamUnauthorizedPath   string `yaml:"upstream-unauthorized-path" json:"upstream-unauthorized-path" env:"UPSTREAM_UNAUTHORIZED_PATH"`
+	UpstreamUnauthorizedMethod string `yaml:"upstream-unauthorized-method" json:"upstream-unauthorized-method" env:"UPSTREAM_UNAUTHORIZED_METHOD"`
+	UpstreamForbiddenPath      string `yaml:"upstream-forbidden-path" json:"upstream-forbidden-path" env:"UPSTREAM_FORBIDDEN_PATH"`
+	UpstreamForbiddenMethod    string `yaml:"upstream-forbidden-method" json:"upstream-forbidden-method" env:"UPSTREAM_FORBIDDEN_METHOD"`
 
 	// NoRedirects informs we should hand back a 401 not a redirect
 	NoRedirects bool `json:"no-redirects" yaml:"no-redirects" usage:"do not have back redirects when no authentication is present, 401 them" env:"NO_REDIRECTS"`
