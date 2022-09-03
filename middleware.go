@@ -24,6 +24,7 @@ import (
 	"time"
 
 	uuid "github.com/gofrs/uuid"
+
 	"github.com/gogatekeeper/gatekeeper/pkg/authorization"
 	"github.com/gogatekeeper/gatekeeper/pkg/constant"
 	"github.com/gogatekeeper/gatekeeper/pkg/encryption"
@@ -32,10 +33,11 @@ import (
 	"github.com/PuerkitoBio/purell"
 	oidc3 "github.com/coreos/go-oidc/v3/oidc"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/gogatekeeper/gatekeeper/pkg/apperrors"
 	"github.com/unrolled/secure"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/gogatekeeper/gatekeeper/pkg/apperrors"
 )
 
 const (
@@ -51,6 +53,7 @@ func (r *oauthProxy) entrypointMiddleware(next http.Handler) http.Handler {
 		// Save the exact formatting of the incoming request so we can use it later
 		scope.Path = req.URL.Path
 		scope.RawPath = req.URL.RawPath
+		scope.Method = req.Method
 		scope.Logger = r.log
 
 		// We want to Normalize the URL so that we can more easily and accurately
@@ -639,6 +642,11 @@ func (r *oauthProxy) admissionMiddleware(resource *authorization.Resource) func(
 			}
 
 			user := scope.Identity
+
+			if scope.ForceProxy {
+				next.ServeHTTP(wrt, req)
+				return
+			}
 
 			// @step: we need to check the roles
 			if !utils.HasAccess(resource.Roles, user.roles, !resource.RequireAnyRole) {

@@ -21,9 +21,10 @@ import (
 	"net/http"
 
 	"github.com/Nerzal/gocloak/v11"
+	"go.uber.org/zap"
+
 	"github.com/gogatekeeper/gatekeeper/pkg/constant"
 	"github.com/gogatekeeper/gatekeeper/pkg/utils"
-	"go.uber.org/zap"
 )
 
 /*
@@ -81,6 +82,7 @@ func (r *oauthProxy) proxyMiddleware(next http.Handler) http.Handler {
 		if scope != nil {
 			req.URL.Path = scope.Path
 			req.URL.RawPath = scope.RawPath
+			req.Method = scope.Method
 		}
 		if v := req.Header.Get("Host"); v != "" {
 			req.Host = v

@@ -252,10 +252,10 @@ type Config struct {
 	// EncryptionKey is the encryption key used to encrypt the refresh token
 	EncryptionKey string `json:"encryption-key" yaml:"encryption-key" usage:"encryption key used to encryption the session state" env:"ENCRYPTION_KEY"`
 
-	// UnauthorizedRedirectURL is an url to which the redirect will be made instead of the standard redirect with a 401 http status code
-	UnauthorizedRedirectURL string `yaml:"unauthorized-redirect-url" json:"unauthorized-redirect-url" usage:"set an url to overwrite the standard url for redirect on 401 error, e.g /unauthorized, https://domen.com/unauthorized (when redirecting to yourself - do not forget to set resources)" env:"UNAUTHORIZED_REDIRECT_URL"`
-	// UnauthorizedRedirectHTTPStatusCode is an error status code that will be sent when redirecting to UnauthorizedRedirectURL
-	UnauthorizedRedirectHTTPStatusCode int `yaml:"unauthorized-redirect-http-status-code" json:"unauthorized-redirect-http-status-code" usage:"set port instead of default port (303) when redirecting with 401 error" env:"UNAUTHORIZED_REDIRECT_HTTP_STATUS_CODE"`
+	// UnauthorizedProxyRedirectPath is an url to which the redirect will be made instead of the standard redirect with a 401 http status code
+	UnauthorizedProxyRedirectPath string `yaml:"unauthorized-proxy-redirect-path" json:"unauthorized-proxy-redirect-path" usage:"set an url to overwrite the standard url for redirect on 401 error, e.g /unauthorized, https://domen.com/unauthorized (when redirecting to yourself - do not forget to set resources)" env:"UNAUTHORIZED_REDIRECT_URL"`
+	// UnauthorizedProxyRedirectMethod is an error status code that will be sent when redirecting to UnauthorizedProxyRedirectPath
+	UnauthorizedProxyRedirectMethod string `yaml:"unauthorized-proxy-redirect-method" json:"unauthorized-proxy-redirect-method" usage:"set port instead of default port (303) when redirecting with 401 error" env:"UNAUTHORIZED_REDIRECT_HTTP_STATUS_CODE"`
 
 	// NoRedirects informs we should hand back a 401 not a redirect
 	NoRedirects bool `json:"no-redirects" yaml:"no-redirects" usage:"do not have back redirects when no authentication is present, 401 them" env:"NO_REDIRECTS"`
@@ -342,6 +342,8 @@ func getVersion() string {
 
 // RequestScope is a request level context scope passed between middleware
 type RequestScope struct {
+	// ForceProxy is proxy without user validation
+	ForceProxy bool
 	// AccessDenied indicates the request should not be proxied on
 	AccessDenied bool
 	// Identity is the user Identity of the request
@@ -351,7 +353,10 @@ type RequestScope struct {
 	// Preserve the original request path: KEYCLOAK-10864, KEYCLOAK-11276, KEYCLOAK-13315
 	// The exact path received in the request, if different than Path
 	RawPath string
-	Logger  *zap.Logger
+	// Method is property for proxy http method overwriting
+	Method string
+
+	Logger *zap.Logger
 }
 
 // reverseProxy is a wrapper

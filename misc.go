@@ -251,22 +251,30 @@ func (r *oauthProxy) redirectToAuthorization(wrt http.ResponseWriter, req *http.
 		return r.revokeProxy(wrt, req)
 	}
 
-	redirectURL := r.config.WithOAuthURI(constant.AuthorizationURL)
-	redirectStatusCode := http.StatusSeeOther
-
-	if r.config.UnauthorizedRedirectURL != "" {
-		redirectURL = r.config.UnauthorizedRedirectURL
-
-		if r.config.UnauthorizedRedirectHTTPStatusCode != 0 {
-			redirectStatusCode = r.config.UnauthorizedRedirectHTTPStatusCode
+	if r.config.UnauthorizedProxyRedirectPath != "" {
+		scope, assertOk := req.Context().Value(constant.ContextScopeName).(*RequestScope)
+		if !assertOk {
+			scope = &RequestScope{}
 		}
+
+		scope.AccessDenied = false
+		scope.ForceProxy = true
+		scope.Path = r.config.UnauthorizedProxyRedirectPath
+		scope.RawPath = r.config.UnauthorizedProxyRedirectPath
+		scope.Method = r.config.UnauthorizedProxyRedirectMethod
+
+		if !strings.HasPrefix(scope.Path, "/") {
+			scope.Path = "/" + scope.Path
+		}
+
+		return context.WithValue(req.Context(), constant.ContextScopeName, scope)
 	}
 
 	r.redirectToURL(
-		redirectURL+authQuery,
+		r.config.WithOAuthURI(constant.AuthorizationURL+authQuery),
 		wrt,
 		req,
-		redirectStatusCode,
+		http.StatusSeeOther,
 	)
 
 	return r.revokeProxy(wrt, req)
