@@ -109,6 +109,15 @@ type Config struct {
 	Upstream string `json:"upstream-url" yaml:"upstream-url" usage:"url for the upstream endpoint you wish to proxy" env:"UPSTREAM_URL"`
 	// UpstreamCA is the path to a CA certificate in PEM format to validate the upstream certificate
 	UpstreamCA string `json:"upstream-ca" yaml:"upstream-ca" usage:"the path to a file container a CA certificate to validate the upstream tls endpoint" env:"UPSTREAM_CA"`
+	// UpstreamUnauthorizedPath is a path to which the request will be redirected to upstream in case of an unauthorized error (401). Can be used to customize behavior on 401 error.
+	UpstreamUnauthorizedPath string `json:"upstream-unauthorized-path" yaml:"upstream-unauthorized-path" usage:"set to redirect to upstream on 401 error, e.g /errors/unauthorized" env:"UPSTREAM_UNAUTHORIZED_PATH"`
+	// UpstreamUnauthorizedMethod is a http method to which the request will be redirected to upstream in case of an unauthorized error (401).
+	UpstreamUnauthorizedMethod string `json:"upstream-unauthorized-method" yaml:"upstream-unauthorized-method" usage:"set to redirect to upstream on 401 error, e.g POST, PUT, PATCH, GET, DELETE, OPTIONS" env:"UPSTREAM_UNAUTHORIZED_METHOD"`
+	// UpstreamForbiddenPath is a http method to which the request will be redirected to upstream in case of a forbidden error (403). Can be used to customize behavior on 403 error.
+	UpstreamForbiddenPath string `json:"upstream-forbidden-path" yaml:"upstream-forbidden-path" usage:"set to redirect to upstream on 403 error, e.g /errors/forbidden"  env:"UPSTREAM_FORBIDDEN_PATH"`
+	// UpstreamForbiddenMethod is a http method to which the request will be redirected to upstream in case of a forbidden error (403).
+	UpstreamForbiddenMethod string `json:"upstream-forbidden-method" yaml:"upstream-forbidden-method" usage:"set to redirect to upstream on 403 error, e.g POST, PUT, PATCH, GET, DELETE, OPTIONS" env:"UPSTREAM_FORBIDDEN_METHOD"`
+
 	// Resources is a list of protected resources
 	Resources []*authorization.Resource `json:"resources" yaml:"resources" usage:"list of resources 'uri=/admin*|methods=GET,PUT|roles=role1,role2'"`
 	// Headers permits adding customs headers across the board
@@ -251,11 +260,6 @@ type Config struct {
 	StoreURL string `json:"store-url" yaml:"store-url" usage:"url for the storage subsystem, e.g redis://127.0.0.1:6379, file:///etc/tokens.file" env:"STORE_URL"`
 	// EncryptionKey is the encryption key used to encrypt the refresh token
 	EncryptionKey string `json:"encryption-key" yaml:"encryption-key" usage:"encryption key used to encryption the session state" env:"ENCRYPTION_KEY"`
-
-	UpstreamUnauthorizedPath   string `yaml:"upstream-unauthorized-path" json:"upstream-unauthorized-path" env:"UPSTREAM_UNAUTHORIZED_PATH"`
-	UpstreamUnauthorizedMethod string `yaml:"upstream-unauthorized-method" json:"upstream-unauthorized-method" env:"UPSTREAM_UNAUTHORIZED_METHOD"`
-	UpstreamForbiddenPath      string `yaml:"upstream-forbidden-path" json:"upstream-forbidden-path" env:"UPSTREAM_FORBIDDEN_PATH"`
-	UpstreamForbiddenMethod    string `yaml:"upstream-forbidden-method" json:"upstream-forbidden-method" env:"UPSTREAM_FORBIDDEN_METHOD"`
 
 	// NoRedirects informs we should hand back a 401 not a redirect
 	NoRedirects bool `json:"no-redirects" yaml:"no-redirects" usage:"do not have back redirects when no authentication is present, 401 them" env:"NO_REDIRECTS"`
